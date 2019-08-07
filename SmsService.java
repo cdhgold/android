@@ -1,16 +1,17 @@
-package com.example.sender;
+package com.cdhgold.shop.sender;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 public class SmsService extends Service {
 
+    private String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
     private IBinder mIBinder = new MyBinder();
-
-    public int var = 777; //서비스바인딩의 예시로 출력할 값
-
+    private BroadcastReceiver mReceiver;
     class MyBinder extends Binder{
         SmsService getService(){
             return SmsService.this; // 서비스 객체를 리턴
@@ -28,11 +29,19 @@ public class SmsService extends Service {
     public void onCreate() {
         Log.e("LOG", "onCreate()");
         super.onCreate();
+        IntentFilter filter = new IntentFilter(SMS_RECEIVED);
+        filter.addAction(SMS_RECEIVED);
+        mReceiver = new SmsReceiver();
+        registerReceiver(mReceiver, filter);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("LOG", "서비스 시작 onStartCommand()");
+        IntentFilter filter = new IntentFilter(SMS_RECEIVED);
+        filter.addAction(SMS_RECEIVED);
+        mReceiver = new SmsReceiver();
+        registerReceiver(mReceiver, filter);
         return super.onStartCommand(intent, flags, startId);
     }
 

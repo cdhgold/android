@@ -1,4 +1,4 @@
-package com.example.sender;
+package com.cdhgold.shop.sender;
 
 import android.content.Intent;
 import android.os.Bundle;

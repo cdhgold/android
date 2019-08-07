@@ -1,4 +1,4 @@
-package com.example.sender;
+package com.cdhgold.shop.sender;
 
 import android.content.ComponentName;
 import android.content.ServiceConnection;
