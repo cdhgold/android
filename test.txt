@@ -1,1 +1,21 @@
-sdfsdfsdf
+
+runtime 시에 권한요청 
+mainActivity
+private int MY_PERMISSIONS_REQUEST_SMS_RECEIVE = 10;
+ActivityCompat.requestPermissions(this, 
+            new String[]{Manifest.permission.RECEIVE_SMS},
+            MY_PERMISSIONS_REQUEST_SMS_RECEIVE);
+ @Override
+public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    if (requestCode == MY_PERMISSIONS_REQUEST_SMS_RECEIVE) {
+        // YES!!
+        Log.i("TAG", "MY_PERMISSIONS_REQUEST_SMS_RECEIVE --> YES");
+    }
+}
+권한확인 
+  if (ContextCompat.checkSelfPermission(thisActivity, Manifest.permission.RECEIVE_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+        // Permission is not granted
+    }
+	
