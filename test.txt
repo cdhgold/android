@@ -1,24 +1,11 @@
-package com.example.sendmulti;
+ <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
-import android.os.Environment;
-import android.widget.ImageView;
-
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.JSONObjectRequestListener;
-
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-
+    <application
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true"
+        
 public class MainActivity extends AppCompatActivity {
     private ImageView carImg01;
     @Override
@@ -70,12 +57,21 @@ public class MainActivity extends AppCompatActivity {
             // tag 인식속성
             // AndroidNetworking.forceCancel("tag"); // 취소시
             //
+            Log.d("campCar",file.getName());
+            Log.d("campCar", String.valueOf(file.length())  );
 
-
-            AndroidNetworking.post("http://konginfo.co.kr/car/carIns/save")
-                    .addBodyParameter("carNm", "cdhgold")
+            String uploadUrl = "http://konginfo.co.kr/car/carIns/saveApp";
+           /*
+            AndroidNetworking.post(uploadUrl)
+                    .addBodyParameter("carNm", "cdhgold1")
                     .addBodyParameter("carAmt", "1000")
-                   // .addFileBody(file) // posting any type of file
+                    .addBodyParameter("carTel", "010")
+                    .addBodyParameter("carAddr", "aaa")
+                    .addBodyParameter("carYear", "2020")
+                    .addBodyParameter("carKm",	 "1000")
+                    .addBodyParameter("carFuel", " ")
+                    .addBodyParameter("carInfo", "test ")
+                    //.addFileBody(file) // posting any type of file
                     .setTag("campCar")
                     .setPriority(Priority.MEDIUM)
                     .build()
@@ -87,9 +83,35 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onError(ANError error) {
                             // handle error
-                            System.out.println("car=>"+error);
+                            System.out.println("car error=>"+error);
                         }
                     });
-        }
-    }
-}
+                    */
+
+                AndroidNetworking.upload(uploadUrl)
+                    .addMultipartFile("carImg01",file)
+                    .addMultipartParameter("carNm","대현캠핑카")
+                    .setTag("campCar")
+                    .setPriority(Priority.HIGH)
+                    .build()
+                    .setUploadProgressListener(new UploadProgressListener() {
+                        @Override
+                        public void onProgress(long bytesUploaded, long totalBytes) {
+                            // do anything with progress
+                            Log.d("responce_app",String.valueOf(bytesUploaded));
+                        }
+                    })
+                    .getAsJSONObject(new JSONObjectRequestListener() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            // do anything with response
+                            Log.d("responce_app",String.valueOf(response));
+                        }
+                        @Override
+                        public void onError(ANError error) {
+                            // handle error
+                            Log.d("responce_app err ",String.valueOf(error));
+                            Log.d("responce_app err ","errorrrr");
+                        }
+                    });
+        }// end run
