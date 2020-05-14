@@ -1,146 +1,95 @@
-compile group: 'cz.msebera.android' , name: 'httpclient' , version: '4.5.8'
-var url =  "";
-var file = "";
+package com.example.sendmulti;
 
-try
-{
-    //read file into upfilebytes array
-    var upfilebytes = File.ReadAllBytes(file);
+import androidx.appcompat.app.AppCompatActivity;
 
-    //create new HttpClient and MultipartFormDataContent and add our file, and StudentId
-    HttpClient client = new HttpClient();
-    MultipartFormDataContent content = new MultipartFormDataContent();
-    ByteArrayContent baContent = new ByteArrayContent(upfilebytes);
-    StringContent studentIdContent = new StringContent("2123");
-    content.Add(baContent, "File", "filename.ext");
-    content.Add(studentIdContent, "StudentId");
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.os.Environment;
+import android.widget.ImageView;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
 
-    //upload MultipartFormDataContent content async and store response in response var
-    var response = await client.PostAsync(url, content);
+import org.json.JSONObject;
 
-    //read response result as a string async into json var
-    var responsestr = response.Content.ReadAsStringAsync().Result;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
-    //debug
-    Debug.WriteLine(responsestr);
-}
-catch (Exception e)
-{
-    //debug
-    Debug.WriteLine("Exception Caught: " + e.ToString());
-    return;
-}
-==================================
-onActivityResult에서 파일을 생성 
+public class MainActivity extends AppCompatActivity {
+    private ImageView carImg01;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        carImg01 = (ImageView)findViewById(R.id.carImg01);
+        Bitmap bitmap = ((BitmapDrawable)carImg01.getDrawable()).getBitmap();
 
-// ImageView 에 이미지 출력 
-Uri dataUri = data.getData();
-InputStream in = getContentResolver().openInputStream(dataUri); 
-Bitmap image = BitmapFactory.decodeStream(in); 
-imgVwSelected.setImageBitmap(image); in.close();
-                 
-tempSelectFile = new File(Environment.getExternalStorageDirectory()+"/Camping/Car/", "temp_" + date + ".jpeg"); 
-OutputStream out = new FileOutputStream(tempSelectFile); 
-image.compress(Bitmap.CompressFormat.JPEG, 100, out);
- 				
-				
-				String boundary = "^-----^";
-                String LINE_FEED = "\r\n";
-                String charset = "UTF-8";
-                OutputStream outputStream;
-                PrintWriter writer;
-
-                JSONObject result = null;
-                try{
-
-                    URL url = new URL("요청 URL");
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-                    connection.setRequestProperty("Content-Type", "multipart/form-data;charset=utf-8;boundary=" + boundary);
-                    connection.setRequestMethod("POST");
-                    connection.setDoInput(true);
-                    connection.setDoOutput(true);
-                    connection.setUseCaches(false);
-                    connection.setConnectTimeout(15000);
-
-                    outputStream = connection.getOutputStream();
-                    writer = new PrintWriter(new OutputStreamWriter(outputStream, charset), true);
-
-                    /** Body에 데이터를 넣어줘야 할경우 없으면 Pass **/
-                    writer.append("--" + boundary).append(LINE_FEED);
-                    writer.append("Content-Disposition: form-data; name=\"데이터 키값\"").append(LINE_FEED);
-                    writer.append("Content-Type: text/plain; charset=" + charset).append(LINE_FEED);
-                    writer.append(LINE_FEED);
-                    writer.append("데이터값").append(LINE_FEED);
-                    writer.flush();
-
-                    /** 파일 데이터를 넣는 부분**/
-                    writer.append("--" + boundary).append(LINE_FEED);
-                    writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"" + file.getName() + "\"").append(LINE_FEED);
-                    writer.append("Content-Type: " + URLConnection.guessContentTypeFromName(file.getName())).append(LINE_FEED);
-                    writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
-                    writer.append(LINE_FEED);
-                    writer.flush();
-
-                    FileInputStream inputStream = new FileInputStream(file);
-                    byte[] buffer = new byte[(int)file.length()];
-                    int bytesRead = -1;
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-                    outputStream.flush();
-                    inputStream.close();
-                    writer.append(LINE_FEED);
-                    writer.flush();
-
-                    writer.append("--" + boundary + "--").append(LINE_FEED);
-                    writer.close();
-
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
-                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        String inputLine;
-                        StringBuffer response = new StringBuffer();
-                        while ((inputLine = in.readLine()) != null) {
-                            response.append(inputLine);
-                        }
-                        in.close();
-
-                        try {
-                            result = new JSONObject(response.toString());
-                            
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-                        String inputLine;
-                        StringBuffer response = new StringBuffer();
-                        while ((inputLine = in.readLine()) != null) {
-                            response.append(inputLine);
-                        }
-                        in.close();
-                        result = new JSONObject(response.toString());
-                    }
-
-                } catch (ConnectException e) {
-                    Log.e(TAG, "ConnectException");
-                    e.printStackTrace();
-
-
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-
-                return result;
+        try {
+            File filePath = new File(Environment.getRootDirectory()+"/car/"   );
+            if(!filePath.exists()){
+                filePath.mkdirs();
             }
+            //file.createNewFile();
+            File file  = new File(getApplicationContext().getFilesDir()+"/carImg01.jpg"   );
 
-            @Override
-            protected void onPostExecute(JSONObject jsonObject) {
-                super.onPostExecute(jsonObject);
+            OutputStream out = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            Send send  = new Send(file);
+            send.start( );
+
+            out.close();
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        } finally {
+
+            try {
+
+            } catch ( Exception e) {
+                e.printStackTrace();
             }
+        }
 
-        }.execute();
 
- 
+    }
+
+
+    class Send  extends Thread{
+        public File file;
+        public Send(File f){
+            this.file = f;
+
+        }
+        @Override
+        public void run() {
+            // tag 인식속성
+            // AndroidNetworking.forceCancel("tag"); // 취소시
+            //
+
+
+            AndroidNetworking.post("http://konginfo.co.kr/car/carIns/save")
+                    .addBodyParameter("carNm", "cdhgold")
+                    .addBodyParameter("carAmt", "1000")
+                   // .addFileBody(file) // posting any type of file
+                    .setTag("campCar")
+                    .setPriority(Priority.MEDIUM)
+                    .build()
+                    .getAsJSONObject(new JSONObjectRequestListener() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            System.out.println("car=>"+response);
+                        }
+                        @Override
+                        public void onError(ANError error) {
+                            // handle error
+                            System.out.println("car=>"+error);
+                        }
+                    });
+        }
+    }
+}
