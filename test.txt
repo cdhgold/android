@@ -50,7 +50,7 @@
 
                         dos.writeBytes(twoHyphens + boundary + lineEnd);
                         //한글깨짐
-                        dos.writeBytes("Content-Disposition: form-data; name=\"carNm\""+lineEnd+lineEnd+"르노마스터캠핑카"+lineEnd);
+                         dos.writeBytes("Content-Disposition: form-data; name=\"carNm\""+lineEnd+lineEnd+ URLEncoder.encode("르노마스터캠핑카", "UTF-8")+lineEnd);
                         dos.writeBytes(twoHyphens + boundary + lineEnd);
                         dos.writeBytes("Content-Disposition: form-data; name=\"carImg01\";filename=\""
                                 + "carImg01.jpg" + "\"" + lineEnd);
