@@ -1,52 +1,4 @@
- <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <application
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true"
-        
-public class MainActivity extends AppCompatActivity {
-    private ImageView carImg01;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        carImg01 = (ImageView)findViewById(R.id.carImg01);
-        Bitmap bitmap = ((BitmapDrawable)carImg01.getDrawable()).getBitmap();
-
-        try {
-            File filePath = new File(Environment.getRootDirectory()+"/car/"   );
-            if(!filePath.exists()){
-                filePath.mkdirs();
-            }
-            //file.createNewFile();
-            File file  = new File(getApplicationContext().getFilesDir()+"/carImg01.jpg"   );
-
-            OutputStream out = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            Send send  = new Send(file);
-            send.start( );
-
-            out.close();
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        } finally {
-
-            try {
-
-            } catch ( Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-
-    }
-
-
-    class Send  extends Thread{
+ class Send  extends Thread{
         public File file;
         public Send(File f){
             this.file = f;
@@ -54,64 +6,125 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         public void run() {
-            // tag 인식속성
-            // AndroidNetworking.forceCancel("tag"); // 취소시
-            //
-            Log.d("campCar",file.getName());
-            Log.d("campCar", String.valueOf(file.length())  );
 
-            String uploadUrl = "http://konginfo.co.kr/car/carIns/saveApp";
-           /*
-            AndroidNetworking.post(uploadUrl)
-                    .addBodyParameter("carNm", "cdhgold1")
-                    .addBodyParameter("carAmt", "1000")
-                    .addBodyParameter("carTel", "010")
-                    .addBodyParameter("carAddr", "aaa")
-                    .addBodyParameter("carYear", "2020")
-                    .addBodyParameter("carKm",	 "1000")
-                    .addBodyParameter("carFuel", " ")
-                    .addBodyParameter("carInfo", "test ")
-                    //.addFileBody(file) // posting any type of file
-                    .setTag("campCar")
-                    .setPriority(Priority.MEDIUM)
-                    .build()
-                    .getAsJSONObject(new JSONObjectRequestListener() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            System.out.println("car=>"+response);
-                        }
-                        @Override
-                        public void onError(ANError error) {
-                            // handle error
-                            System.out.println("car error=>"+error);
-                        }
-                    });
-                    */
+            try {
+                String sourceFileUri = "/mnt/sdcard/abc.png";
 
-                AndroidNetworking.upload(uploadUrl)
-                    .addMultipartFile("carImg01",file)
-                    .addMultipartParameter("carNm","대현캠핑카")
-                    .setTag("campCar")
-                    .setPriority(Priority.HIGH)
-                    .build()
-                    .setUploadProgressListener(new UploadProgressListener() {
-                        @Override
-                        public void onProgress(long bytesUploaded, long totalBytes) {
-                            // do anything with progress
-                            Log.d("responce_app",String.valueOf(bytesUploaded));
+                HttpURLConnection conn = null;
+                DataOutputStream dos = null;
+                String lineEnd = "\r\n";
+                String twoHyphens = "--";
+                String boundary = "*****";
+                int bytesRead, bytesAvailable, bufferSize;
+                byte[] buffer;
+                int maxBufferSize = 1 * 1024 * 1024;
+
+
+                if (file.isFile()) {
+
+                    try {
+                        String upLoadServerUri = "http://konginfo.co.kr/car/carIns/saveApp";
+
+                        // open a URL connection to the Servlet
+                        FileInputStream fileInputStream = new FileInputStream(
+                                file);
+                        URL url = new URL(upLoadServerUri);
+
+                        // Open a HTTP connection to the URL
+                        conn = (HttpURLConnection) url.openConnection();
+                        conn.setDoInput(true); // Allow Inputs
+                        conn.setDoOutput(true); // Allow Outputs
+                        conn.setUseCaches(false); // Don't use a Cached Copy
+                        conn.setRequestMethod("POST");
+                        conn.setRequestProperty("Connection", "Keep-Alive");
+                        conn.setRequestProperty("ENCTYPE",
+                                "multipart/form-data");
+                        conn.setRequestProperty("Content-Type",
+                                "multipart/form-data;boundary=" + boundary);
+                       // conn.setRequestProperty("carImg01", "carImg01");
+                        conn.setRequestProperty("carNm", "르노마스터캠핑카");
+                        conn.setRequestProperty("carTel", "01012349999");
+
+                        dos = new DataOutputStream(conn.getOutputStream());
+
+
+                        dos.writeBytes(twoHyphens + boundary + lineEnd);
+                        //한글깨짐
+                        dos.writeBytes("Content-Disposition: form-data; name=\"carNm\""+lineEnd+lineEnd+"르노마스터캠핑카"+lineEnd);
+                        dos.writeBytes(twoHyphens + boundary + lineEnd);
+                        dos.writeBytes("Content-Disposition: form-data; name=\"carImg01\";filename=\""
+                                + "carImg01.jpg" + "\"" + lineEnd);
+
+                        dos.writeBytes(lineEnd);
+
+                        // create a buffer of maximum size
+                        bytesAvailable = fileInputStream.available();
+
+                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                        buffer = new byte[bufferSize];
+
+                        // read file and write it into form...
+                        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                        while (bytesRead > 0) {
+
+                            dos.write(buffer, 0, bufferSize);
+                            bytesAvailable = fileInputStream.available();
+                            bufferSize = Math
+                                    .min(bytesAvailable, maxBufferSize);
+                            bytesRead = fileInputStream.read(buffer, 0,
+                                    bufferSize);
+
                         }
-                    })
-                    .getAsJSONObject(new JSONObjectRequestListener() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            // do anything with response
-                            Log.d("responce_app",String.valueOf(response));
+
+                        // send multipart form data necesssary after file
+                        // data...
+                        dos.writeBytes(lineEnd);
+                        dos.writeBytes(twoHyphens + boundary + twoHyphens
+                                + lineEnd);
+
+                        // Responses from the server (code and message)
+                        int serverResponseCode = conn.getResponseCode();
+                        String serverResponseMessage = conn
+                                .getResponseMessage();
+
+                        if (serverResponseCode == 200) {
+Log.d("campCar","success");
+ Log.d("campCar",serverResponseMessage);
+                            // messageText.setText(msg);
+                            //Toast.makeText(ctx, "File Upload Complete.",
+                            //      Toast.LENGTH_SHORT).show();
+
+                            // recursiveDelete(mDirectory1);
+
+                        }else{
+                            Log.d("campCar","server err");
+                            Log.d("campCar",serverResponseMessage);
+
                         }
-                        @Override
-                        public void onError(ANError error) {
-                            // handle error
-                            Log.d("responce_app err ",String.valueOf(error));
-                            Log.d("responce_app err ","errorrrr");
-                        }
-                    });
-        }// end run
+
+                        // close the streams //
+                        fileInputStream.close();
+                        dos.flush();
+                        dos.close();
+
+                    } catch (Exception e) {
+
+                        // dialog.dismiss();
+                        e.printStackTrace();
+
+                    }
+                    // dialog.dismiss();
+
+                } // End else block
+
+
+            } catch (Exception ex) {
+                // dialog.dismiss();
+
+                ex.printStackTrace();
+            }
+
+        }
+
+    }
