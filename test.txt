@@ -1,130 +1,51 @@
- class Send  extends Thread{
-        public File file;
-        public Send(File f){
-            this.file = f;
-
-        }
-        @Override
-        public void run() {
-
-            try {
-                String sourceFileUri = "/mnt/sdcard/abc.png";
-
-                HttpURLConnection conn = null;
-                DataOutputStream dos = null;
-                String lineEnd = "\r\n";
-                String twoHyphens = "--";
-                String boundary = "*****";
-                int bytesRead, bytesAvailable, bufferSize;
-                byte[] buffer;
-                int maxBufferSize = 1 * 1024 * 1024;
+Access Control Group
+ncloud-default-acg(192514)
 
 
-                if (file.isFile()) {
+인증키 이름	campcar
 
-                    try {
-                        String upLoadServerUri = "http://konginfo.co.kr/car/carIns/saveApp";
-
-                        // open a URL connection to the Servlet
-                        FileInputStream fileInputStream = new FileInputStream(
-                                file);
-                        URL url = new URL(upLoadServerUri);
-
-                        // Open a HTTP connection to the URL
-                        conn = (HttpURLConnection) url.openConnection();
-                        conn.setDoInput(true); // Allow Inputs
-                        conn.setDoOutput(true); // Allow Outputs
-                        conn.setUseCaches(false); // Don't use a Cached Copy
-                        conn.setRequestMethod("POST");
-                        conn.setRequestProperty("Connection", "Keep-Alive");
-                        conn.setRequestProperty("ENCTYPE",
-                                "multipart/form-data");
-                        conn.setRequestProperty("Content-Type",
-                                "multipart/form-data;boundary=" + boundary);
-                       // conn.setRequestProperty("carImg01", "carImg01");
-                        conn.setRequestProperty("carNm", "르노마스터캠핑카");
-                        conn.setRequestProperty("carTel", "01012349999");
-
-                        dos = new DataOutputStream(conn.getOutputStream());
+ACG 이름	 : ncloud-default-acg	                       
+ACG ID	 : 192514	
+ 
+ 
+putty접속 : 
+공인 ID : 210.89.191.76
+port : 1024
 
 
-                        dos.writeBytes(twoHyphens + boundary + lineEnd);
-                        //한글깨짐
-                         dos.writeBytes("Content-Disposition: form-data; name=\"carNm\""+lineEnd+lineEnd+ URLEncoder.encode("르노마스터캠핑카", "UTF-8")+lineEnd);
-                        dos.writeBytes(twoHyphens + boundary + lineEnd);
-                        dos.writeBytes("Content-Disposition: form-data; name=\"carImg01\";filename=\""
-                                + "carImg01.jpg" + "\"" + lineEnd);
 
-                        dos.writeBytes(lineEnd);
+PHP 7.1 버전 설치 방법 안내
 
-                        // create a buffer of maximum size
-                        bytesAvailable = fileInputStream.available();
+1) epel 저장소 추가 : yum -y install epel-release
 
-                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                        buffer = new byte[bufferSize];
+2) remi 저장소 추가 : rpm -ivh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 
-                        // read file and write it into form...
-                        bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+3) PHP 설치 : yum --enablerepo=remi-php71 install -y php php-gd php-mysql
 
-                        while (bytesRead > 0) {
+4) 버전 확인 : php -v
 
-                            dos.write(buffer, 0, bufferSize);
-                            bytesAvailable = fileInputStream.available();
-                            bufferSize = Math
-                                    .min(bytesAvailable, maxBufferSize);
-                            bytesRead = fileInputStream.read(buffer, 0,
-                                    bufferSize);
-
-                        }
-
-                        // send multipart form data necesssary after file
-                        // data...
-                        dos.writeBytes(lineEnd);
-                        dos.writeBytes(twoHyphens + boundary + twoHyphens
-                                + lineEnd);
-
-                        // Responses from the server (code and message)
-                        int serverResponseCode = conn.getResponseCode();
-                        String serverResponseMessage = conn
-                                .getResponseMessage();
-
-                        if (serverResponseCode == 200) {
-Log.d("campCar","success");
- Log.d("campCar",serverResponseMessage);
-                            // messageText.setText(msg);
-                            //Toast.makeText(ctx, "File Upload Complete.",
-                            //      Toast.LENGTH_SHORT).show();
-
-                            // recursiveDelete(mDirectory1);
-
-                        }else{
-                            Log.d("campCar","server err");
-                            Log.d("campCar",serverResponseMessage);
-
-                        }
-
-                        // close the streams //
-                        fileInputStream.close();
-                        dos.flush();
-                        dos.close();
-
-                    } catch (Exception e) {
-
-                        // dialog.dismiss();
-                        e.printStackTrace();
-
-                    }
-                    // dialog.dismiss();
-
-                } // End else block
+ root / 최대현007@ , N8*u6u*MiRHTe
+ 
+서버시작시 자동시작 
+// Apache # systemctl enable httpd 
+// MySQL # systemctl enable mariadb
+ 
+ 
+ 업	우분투 명령어	CentOS6	  명령어							CentOS7 명령어
+시작	service mysql start	service mysqld start			systemctl start mariadb
+정지	service mysql stop	service mysqld stop				systemctl stop mariadb
+재시작	service mysql restart	service mysqld restart		systemctl restart mariadb
+상태확인	service mysql status	service mysqld status	systemctl status mariadb
 
 
-            } catch (Exception ex) {
-                // dialog.dismiss();
-
-                ex.printStackTrace();
-            }
-
-        }
-
-    }
+-- mysql설치 
+yum install mysql 
+yum list installed | grep mariadb 
+yum install mariadb-server 
+systemctl start mariadb
+또는: 
+service mariadb start
+// 부팅시 자동등록 
+systemctl enable httpd.service
+ ps -ef | grep httpd 명령어를 사용하여 현재 apache가 실행되고 있는지 여부를 확인할 수 있습니다.
+ 
